@@ -35,6 +35,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            position: relative;
         }
 
         .tracker-container {
@@ -46,6 +47,7 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
             padding: 32px;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         header {
@@ -356,22 +358,126 @@
         .btn-resolve.lose { background-color: var(--danger); }
         .btn-resolve.lose:hover { background-color: #dc2626; }
 
+        /* --- TOP LEFT ICON TOGGLE STYLES --- */
+        .top-left-toggle {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 4px;
+            gap: 4px;
+            z-index: 1000;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            box-shadow: none;
+            transition: all 0.2s ease;
+        }
+
+        .icon-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            transform: none;
+        }
+
+        .icon-btn.active {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        /* --- RESPONSIVE MEDIA QUERIES & FORCED MOBILE MODE SIMULATION --- */
         @media (max-width: 680px) {
+            body { 
+                padding-top: 70px; /* Make room for absolute top-left toggle */
+                align-items: flex-start;
+            }
+            .tracker-container { padding: 16px; }
+            h1 { font-size: 1.6rem; }
             .panelist-row, .wager-row {
                 flex-direction: column;
                 align-items: stretch;
                 text-align: center;
+                padding: 16px;
             }
+            .name-input-wrapper { min-width: 100%; }
             .btn-group, .wager-controls {
                 justify-content: center;
-            }
-            .score-badge {
+                flex-wrap: wrap;
                 width: 100%;
             }
+            .panelist-row button, .custom-input-group, .wager-input, .btn-resolve {
+                flex: 1;
+                min-width: 80px;
+            }
+            .score-badge { width: 100%; }
         }
+
+        /* Simulated Mobile Screen Overrides */
+        body.force-mobile {
+            align-items: flex-start;
+            padding-top: 70px;
+        }
+        body.force-mobile .tracker-container {
+            max-width: 375px; 
+            padding: 16px;
+        }
+        body.force-mobile h1 { font-size: 1.5rem; }
+        body.force-mobile .panelist-row, body.force-mobile .wager-row {
+            flex-direction: column;
+            align-items: stretch;
+            text-align: center;
+            padding: 14px;
+        }
+        body.force-mobile .name-input-wrapper { min-width: 100%; }
+        body.force-mobile .btn-group, body.force-mobile .wager-controls {
+            justify-content: center;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+        body.force-mobile .panelist-row button, 
+        body.force-mobile .custom-input-group, 
+        body.force-mobile .wager-input, 
+        body.force-mobile .btn-resolve {
+            flex: 1;
+            min-width: 75px;
+        }
+        body.force-mobile .score-badge { width: 100%; }
     </style>
 </head>
 <body>
+
+<div class="top-left-toggle">
+    <button class="icon-btn active" id="btnDesktop" onclick="switchViewMode('desktop')" title="Desktop View">
+        <svg viewBox="0 0 24 24">
+            <path d="M21 2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7l-2 3v1h8v-1l-2-3h7c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H3V4h18v12z"/>
+        </svg>
+    </button>
+    <button class="icon-btn" id="btnMobile" onclick="switchViewMode('mobile')" title="Mobile View">
+        <svg viewBox="0 0 24 24">
+            <path d="M17 1H7c-1.1 0-1.99.9-1.99 2v18c0 1.1.89 2 1.99 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-2-2-2zm-5 21c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm5-4H7V4h10v14z"/>
+        </svg>
+    </button>
+</div>
 
 <div class="tracker-container">
     <header>
@@ -379,24 +485,37 @@
         <p class="subtitle">SCOREBOARD</p>
     </header>
 
-    <!-- Main Scoring List (Keeps fixed visual positions) -->
     <div class="panelist-list" id="panelistList">
-        <!-- Rows dynamically injected here -->
-    </div>
+        </div>
 
-    <!-- Active "Who Am I?" Wager Dashboard -->
     <div class="final-round-container">
         <div class="final-header">
             <h2>🏆 FINAL ROUND 🏆<br>🙈 "Who Am I?" 🙈</h2>
         </div>
 
         <div id="wagerList">
-            <!-- Blind Wager rows injected here dynamically -->
-        </div>
+            </div>
     </div>
 </div>
 
 <script>
+    // Layout engine view mode switch functions
+    function switchViewMode(mode) {
+        const body = document.body;
+        const btnDesktop = document.getElementById('btnDesktop');
+        const btnMobile = document.getElementById('btnMobile');
+
+        if (mode === 'mobile') {
+            body.classList.add('force-mobile');
+            btnMobile.classList.add('active');
+            btnDesktop.classList.remove('active');
+        } else {
+            body.classList.remove('force-mobile');
+            btnDesktop.classList.add('active');
+            btnMobile.classList.remove('active');
+        }
+    }
+
     // Panelists stay structurally mapped to their rows
     const panelists = [
         { id: 1, defaultName: "Panelist 1", score: 0 },
@@ -465,7 +584,7 @@
     }
 
     function addCustomPoints(id) {
-        const input = document.getElementById(`custom-val-${id}`);
+        const input = document.getElementById('custom-val-' + id);
         if (!input) return;
 
         const amount = parseInt(input.value, 10);
@@ -537,6 +656,3 @@
 
 </body>
 </html>
-
-
-optimise this for phones 
