@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Nation Wants to Guess - Final Round</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #1e293b;
+            --accent-color: #f97316;
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --custom-blue: #06b6d4;
+            --final-purple: #8b5cf6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(249, 115, 22, 0.1) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
+            color: var(--text-main);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .tracker-container {
+            width: 100%;
+            max-width: 780px;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            padding: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 32px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 6px;
+            text-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+        }
+
+        h1 span {
+            color: var(--accent-color);
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .panelist-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-bottom: 32px;
+        }
+
+        .panelist-row {
+            display: flex;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 18px 22px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            gap: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-wrap: wrap;
+        }
+
+        .panelist-row:hover {
+            border-color: rgba(249, 115, 22, 0.3);
+            background: rgba(15, 23, 42, 0.8);
+            transform: translateY(-2px);
+        }
+
+        .rank {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--accent-color);
+            min-width: 85px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(249, 115, 22, 0.1);
+            padding: 4px 8px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(249, 115, 22, 0.2);
+        }
+
+        .name-input-wrapper {
+            flex: 1;
+            min-width: 150px;
+            position: relative;
+        }
+
+        .name-input {
+            width: 100%;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .name-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);
+            background: rgba(30, 41, 59, 1);
+        }
+
+        .score-badge {
+            background: #0f172a;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            min-width: 85px;
+            text-align: center;
+            border: 2px solid #334155;
+            color: #f8fafc;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .score-badge.pulse-up {
+            background: var(--success);
+            border-color: #4ade80;
+            transform: scale(1.15);
+        }
+
+        .score-badge.pulse-down {
+            background: var(--danger);
+            border-color: #f87171;
+            transform: scale(1.15);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            cursor: pointer;
+            font-weight: 700;
+            border-radius: 10px;
+            border: none;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 0 14px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .panelist-row button {
+            height: 42px;
+        }
+
+        .btn-plus { background-color: var(--success); }
+        .btn-plus:hover { background-color: #16a34a; }
+        
+        .btn-plus-20 { background-color: #15803d; }
+        .btn-plus-20:hover { background-color: #166534; }
+        
+        .btn-minus { background-color: var(--danger); }
+        .btn-minus:hover { background-color: #dc2626; }
+        
+        .custom-input-group {
+            display: flex;
+            align-items: center;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            height: 42px;
+            transition: all 0.2s;
+        }
+
+        .custom-input-group:focus-within {
+            border-color: var(--custom-blue);
+        }
+
+        .custom-val-input {
+            width: 55px;
+            height: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 700;
+            outline: none;
+        }
+
+        .custom-val-input::-webkit-outer-spin-button,
+        .custom-val-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .btn-custom {
+            background-color: var(--custom-blue);
+            height: 100%;
+            border-radius: 0;
+            padding: 0 14px;
+            box-shadow: none;
+        }
+        .btn-custom:hover { background-color: #0891b2; }
+
+        /* "Who Am I?" Final Round Arena styling */
+        .final-round-container {
+            background: rgba(30, 41, 59, 0.9);
+            border: 2px dashed var(--final-purple);
+            border-radius: 20px;
+            padding: 24px;
+            margin-top: 24px;
+            box-shadow: inset 0 0 20px rgba(139, 92, 246, 0.1);
+        }
+
+        .final-header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 14px;
+        }
+
+        .final-header h2 {
+            font-size: 1.4rem;
+            color: #c084fc;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .wager-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #0f172a;
+            padding: 16px 20px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            gap: 12px;
+            flex-wrap: wrap;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .wager-name-zone {
+            display: flex;
+            flex-direction: column;
+            min-width: 140px;
+            flex: 1;
+        }
+
+        .wager-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .wager-current-bal {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .wager-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .wager-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .wager-input {
+            width: 85px;
+            height: 42px;
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            text-align: center;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            outline: none;
+        }
+
+        .wager-input:focus {
+            border-color: var(--final-purple);
+        }
+
+        .btn-resolve {
+            padding: 0 16px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            height: 42px;
+        }
+
+        .btn-resolve.win { background-color: var(--success); }
+        .btn-resolve.win:hover { background-color: #16a34a; }
+        .btn-resolve.lose { background-color: var(--danger); }
+        .btn-resolve.lose:hover { background-color: #dc2626; }
+
+        @media (max-width: 680px) {
+            .panelist-row, .wager-row {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .btn-group, .wager-controls {
+                justify-content: center;
+            }
+            .score-badge {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="tracker-container">
+    <header>
+        <h1>The Nation Wants to <span>Guess</span></h1>
+        <p class="subtitle">SCOREBOARD</p>
+    </header>
+
+    <!-- Main Scoring List (Keeps fixed visual positions) -->
+    <div class="panelist-list" id="panelistList">
+        <!-- Rows dynamically injected here -->
+    </div>
+
+    <!-- Active "Who Am I?" Wager Dashboard -->
+    <div class="final-round-container">
+        <div class="final-header">
+            <h2>🏆 FINAL ROUND 🏆<br>🙈 "Who Am I?" 🙈</h2>
+        </div>
+
+        <div id="wagerList">
+            <!-- Blind Wager rows injected here dynamically -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Panelists stay structurally mapped to their rows
+    const panelists = [
+        { id: 1, defaultName: "Panelist 1", score: 0 },
+        { id: 2, defaultName: "Panelist 2", score: 0 },
+        { id: 3, defaultName: "Panelist 3", score: 0 }
+    ];
+
+    function initTracker() {
+        const listContainer = document.getElementById('panelistList');
+        listContainer.innerHTML = '';
+
+        panelists.forEach((p) => {
+            const row = document.createElement('div');
+            row.className = 'panelist-row';
+            row.id = `panelist-row-${p.id}`;
+            row.innerHTML = `
+                <div class="rank" id="rank-label-${p.id}">🥇 1st</div>
+                <div class="name-input-wrapper">
+                    <input type="text" class="name-input" id="name-${p.id}" value="${p.defaultName}" placeholder="Name" oninput="syncNamesAndScoresToWager()">
+                </div>
+                <div class="score-badge" id="score-${p.id}">${p.score}</div>
+                <div class="btn-group">
+                    <button class="btn-plus" onclick="adjustScore(${p.id}, 10)">✅ +10</button>
+                    <button class="btn-plus-20" onclick="adjustScore(${p.id}, 20)">👏 +20</button>
+                    <button class="btn-minus" onclick="adjustScore(${p.id}, -10)">💀 -10</button>
+                    
+                    <div class="custom-input-group">
+                        <input type="number" class="custom-val-input" id="custom-val-${p.id}" value="5" placeholder="pts">
+                        <button class="btn-custom" onclick="addCustomPoints(${p.id})">🎯 Add</button>
+                    </div>
+                </div>
+            `;
+            listContainer.appendChild(row);
+        });
+        calculateRanks();
+        buildWagerInterface();
+    }
+
+    function getPlayerName(id) {
+        const input = document.getElementById(`name-${id}`);
+        return input && input.value.trim() ? input.value.trim() : `Panelist ${id}`;
+    }
+
+    function triggerVisualPulse(id, direction) {
+        const badge = document.getElementById(`score-${id}`);
+        if (!badge) return;
+        
+        const className = direction === 'up' ? 'pulse-up' : 'pulse-down';
+        badge.classList.add(className);
+        
+        setTimeout(() => {
+            badge.classList.remove(className);
+        }, 300);
+    }
+
+    function adjustScore(id, amount) {
+        const panelist = panelists.find(p => p.id === id);
+        if (!panelist) return;
+
+        panelist.score += amount;
+        document.getElementById(`score-${id}`).textContent = panelist.score;
+        
+        triggerVisualPulse(id, amount > 0 ? 'up' : 'down');
+        calculateRanks();
+        syncNamesAndScoresToWager();
+    }
+
+    function addCustomPoints(id) {
+        const input = document.getElementById(`custom-val-${id}`);
+        if (!input) return;
+
+        const amount = parseInt(input.value, 10);
+        if (isNaN(amount)) return;
+
+        adjustScore(id, amount);
+    }
+
+    // Calculates placing tags dynamically without altering structural row positions
+    function calculateRanks() {
+        const sorted = [...panelists].sort((a, b) => b.score - a.score);
+        
+        panelists.forEach(p => {
+            const index = sorted.findIndex(s => s.id === p.id);
+            const placementLabels = ["🥇 1st", "🥈 2nd", "🥉 3rd"];
+            const rankLabelElement = document.getElementById(`rank-label-${p.id}`);
+            
+            if (rankLabelElement) {
+                rankLabelElement.textContent = placementLabels[index] || `${index + 1}th`;
+            }
+        });
+    }
+
+    function buildWagerInterface() {
+        const wagerList = document.getElementById('wagerList');
+        wagerList.innerHTML = '';
+        
+        panelists.forEach(p => {
+            const row = document.createElement('div');
+            row.className = 'wager-row';
+            row.innerHTML = `
+                <div class="wager-name-zone">
+                    <span class="wager-name" id="wager-name-${p.id}">🎭 ${getPlayerName(p.id)}</span>
+                    <span class="wager-current-bal" id="wager-bal-${p.id}">Bank: ${p.score} pts</span>
+                </div>
+                <div class="wager-controls">
+                    <span class="wager-label">Wager 💰:</span>
+                    <input type="number" class="wager-input" id="wager-amount-${p.id}" value="50">
+                    <button class="btn-resolve win" onclick="resolveWager(${p.id}, true)">🎉 Win</button>
+                    <button class="btn-resolve lose" onclick="resolveWager(${p.id}, false)">💥 Lose</button>
+                </div>
+            `;
+            wagerList.appendChild(row);
+        });
+    }
+
+    function syncNamesAndScoresToWager() {
+        panelists.forEach(p => {
+            const nameLabel = document.getElementById(`wager-name-${p.id}`);
+            const balLabel = document.getElementById(`wager-bal-${p.id}`);
+            if (nameLabel) nameLabel.textContent = `🎭 ${getPlayerName(p.id)}`;
+            if (balLabel) balLabel.textContent = `Bank: ${p.score} pts`;
+        });
+    }
+
+    function resolveWager(id, isCorrectGuess) {
+        const wagerInput = document.getElementById(`wager-amount-${id}`);
+        if (!wagerInput) return;
+
+        let wagerValue = parseInt(wagerInput.value, 10);
+        if (isNaN(wagerValue)) return;
+
+        const pointAdjustment = isCorrectGuess ? wagerValue : -wagerValue;
+        adjustScore(id, pointAdjustment);
+    }
+
+    window.onload = initTracker;
+</script>
+
+</body>
+</html>
