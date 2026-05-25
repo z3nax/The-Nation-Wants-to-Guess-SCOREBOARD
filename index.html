@@ -14,6 +14,7 @@
             --success: #22c55e;
             --danger: #ef4444;
             --custom-blue: #06b6d4;
+            --custom-red: #f43f5e;
             --final-purple: #8b5cf6;
         }
 
@@ -40,7 +41,7 @@
 
         .tracker-container {
             width: 100%;
-            max-width: 780px;
+            max-width: 860px;
             background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(12px);
             border-radius: 24px;
@@ -118,7 +119,7 @@
 
         .name-input-wrapper {
             flex: 1;
-            min-width: 150px;
+            min-width: 130px;
             position: relative;
         }
 
@@ -244,16 +245,25 @@
             margin: 0;
         }
 
-        .btn-custom {
+        .btn-custom-add {
             background-color: var(--custom-blue);
             height: 100%;
             border-radius: 0;
-            padding: 0 14px;
+            padding: 0 12px;
             box-shadow: none;
         }
-        .btn-custom:hover { background-color: #0891b2; }
+        .btn-custom-add:hover { background-color: #0891b2; }
 
-        /* "Who Am I?" Final Round Arena styling */
+        .btn-custom-sub {
+            background-color: var(--custom-red);
+            height: 100%;
+            border-radius: 0;
+            padding: 0 12px;
+            box-shadow: none;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn-custom-sub:hover { background-color: #e11d48; }
+
         .final-round-container {
             background: rgba(30, 41, 59, 0.9);
             border: 2px dashed var(--final-purple);
@@ -358,7 +368,6 @@
         .btn-resolve.lose { background-color: var(--danger); }
         .btn-resolve.lose:hover { background-color: #dc2626; }
 
-        /* --- TOP LEFT ICON TOGGLE STYLES --- */
         .top-left-toggle {
             position: absolute;
             top: 20px;
@@ -405,10 +414,9 @@
             color: white;
         }
 
-        /* --- RESPONSIVE MEDIA QUERIES & FORCED MOBILE MODE SIMULATION --- */
-        @media (max-width: 680px) {
+        @media (max-width: 768px) {
             body { 
-                padding-top: 70px; /* Make room for absolute top-left toggle */
+                padding-top: 70px;
                 align-items: flex-start;
             }
             .tracker-container { padding: 16px; }
@@ -432,7 +440,6 @@
             .score-badge { width: 100%; }
         }
 
-        /* Simulated Mobile Screen Overrides */
         body.force-mobile {
             align-items: flex-start;
             padding-top: 70px;
@@ -485,21 +492,17 @@
         <p class="subtitle">SCOREBOARD</p>
     </header>
 
-    <div class="panelist-list" id="panelistList">
-        </div>
+    <div class="panelist-list" id="panelistList"></div>
 
     <div class="final-round-container">
         <div class="final-header">
             <h2>🏆 FINAL ROUND 🏆<br>🙈 "Who Am I?" 🙈</h2>
         </div>
-
-        <div id="wagerList">
-            </div>
+        <div id="wagerList"></div>
     </div>
 </div>
 
 <script>
-    // Layout engine view mode switch functions
     function switchViewMode(mode) {
         const body = document.body;
         const btnDesktop = document.getElementById('btnDesktop');
@@ -516,7 +519,6 @@
         }
     }
 
-    // Panelists stay structurally mapped to their rows
     const panelists = [
         { id: 1, defaultName: "Panelist 1", score: 0 },
         { id: 2, defaultName: "Panelist 2", score: 0 },
@@ -543,8 +545,9 @@
                     <button class="btn-minus" onclick="adjustScore(${p.id}, -10)">💀 -10</button>
                     
                     <div class="custom-input-group">
-                        <input type="number" class="custom-val-input" id="custom-val-${p.id}" value="5" placeholder="pts">
-                        <button class="btn-custom" onclick="addCustomPoints(${p.id})">🎯 Add</button>
+                        <input type="number" class="custom-val-input" id="custom-val-${p.id}" value="100" placeholder="pts">
+                        <button class="btn-custom-add" onclick="addCustomPoints(${p.id}, true)" title="Add points">➕ Add</button>
+                        <button class="btn-custom-sub" onclick="addCustomPoints(${p.id}, false)" title="Subtract points">❌ Minus</button>
                     </div>
                 </div>
             `;
@@ -583,17 +586,20 @@
         syncNamesAndScoresToWager();
     }
 
-    function addCustomPoints(id) {
+    function addCustomPoints(id, isPositive) {
         const input = document.getElementById('custom-val-' + id);
         if (!input) return;
 
-        const amount = parseInt(input.value, 10);
+        let amount = parseInt(input.value, 10);
         if (isNaN(amount)) return;
+
+        if (!isPositive) {
+            amount = -amount;
+        }
 
         adjustScore(id, amount);
     }
 
-    // Calculates placing tags dynamically without altering structural row positions
     function calculateRanks() {
         const sorted = [...panelists].sort((a, b) => b.score - a.score);
         
